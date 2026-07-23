@@ -29,7 +29,7 @@ export interface BaseConfig {
 export const baseConfig: Omit<BaseConfig, "collections"> = {
   backend: {
     name: "github",
-    repo: "OWNER/REPO", // clone step 4 replaces this
+    repo: "avantiglobal/website-sandbox", // clone step 4 replaces this
     branch: "main",
   },
   media_folder: "public/uploads",
