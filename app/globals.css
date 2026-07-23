@@ -1,0 +1,218 @@
+/* Tailwind v4 CSS-first entry. No @tailwind base/components/utilities directives,
+   no tailwind.config.js — tokens live in styles/tokens.css via @theme. */
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* Global element defaults, all token-driven. */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  /* Visible focus indicator everywhere — accessibility floor (spec 0.3). */
+  :focus-visible {
+    outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------------------
+     Shared focus ring — the a11y floor for interactive primitives (spec 0.3).
+     Applied per component via the `u-focus-ring` class so the focus indicator
+     is explicit on each control, not only inherited from the global rule.
+     Every value references a focus-ring token — no literals.
+     ------------------------------------------------------------------------ */
+  .u-focus-ring:focus-visible {
+    outline: var(--focus-ring-width) var(--focus-ring-style)
+      var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* ------------------------------------------------------------------------
+     RichText — styles for every element the CMS markdown editor can emit
+     (spec 0.3). Scoped to `.richtext` so it only touches rendered CMS prose.
+     Token-driven throughout; contrast pairs chosen to clear WCAG AA.
+     ------------------------------------------------------------------------ */
+  .richtext {
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+
+  /* Vertical rhythm: space between consecutive flow elements. */
+  .richtext > * + * {
+    margin-top: var(--spacing-md);
+  }
+
+  .richtext h1,
+  .richtext h2,
+  .richtext h3,
+  .richtext h4,
+  .richtext h5,
+  .richtext h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+  /* Headings get extra breathing room above (but not the first child). */
+  .richtext h1:not(:first-child),
+  .richtext h2:not(:first-child),
+  .richtext h3:not(:first-child),
+  .richtext h4:not(:first-child) {
+    margin-top: var(--spacing-lg);
+  }
+  .richtext h1 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-weight-bold);
+  }
+  .richtext h2 {
+    font-size: var(--text-3xl);
+  }
+  .richtext h3 {
+    font-size: var(--text-2xl);
+  }
+  .richtext h4 {
+    font-size: var(--text-xl);
+  }
+  .richtext h5 {
+    font-size: var(--text-lg);
+  }
+  .richtext h6 {
+    font-size: var(--text-base);
+    color: var(--color-fg-muted);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .richtext a {
+    color: var(--color-primary);
+    text-decoration-line: underline;
+    text-underline-offset: var(--focus-ring-offset);
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .richtext a:hover {
+    color: var(--color-primary-hover);
+  }
+
+  .richtext strong {
+    font-weight: var(--font-weight-semibold);
+  }
+  .richtext em {
+    font-style: italic;
+  }
+  .richtext del {
+    text-decoration-line: line-through;
+    color: var(--color-fg-muted);
+  }
+
+  .richtext ul,
+  .richtext ol {
+    padding-left: var(--spacing-md);
+  }
+  .richtext ul {
+    list-style-type: disc;
+  }
+  .richtext ol {
+    list-style-type: decimal;
+  }
+  .richtext li + li {
+    margin-top: var(--spacing-2xs);
+  }
+  /* Nested lists tighten up and lose the outer rhythm gap. */
+  .richtext li > ul,
+  .richtext li > ol {
+    margin-top: var(--spacing-2xs);
+  }
+
+  .richtext blockquote {
+    border-left: var(--border-width-heavy) solid var(--color-border-strong);
+    padding-left: var(--spacing-md);
+    color: var(--color-fg-muted);
+    font-style: italic;
+  }
+
+  /* Inline code. */
+  .richtext code {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    background-color: var(--color-surface-raised);
+    color: var(--color-fg);
+    padding-inline: var(--spacing-3xs);
+    padding-block: var(--border-width-thick);
+    border-radius: var(--radius-sm);
+  }
+  /* Code block: <pre><code>. Reset the inline chrome; let <pre> own the box. */
+  .richtext pre {
+    background-color: var(--color-neutral-900);
+    color: var(--color-neutral-50);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+  .richtext pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: var(--radius-none);
+    font-size: inherit;
+  }
+
+  .richtext img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+  }
+
+  .richtext hr {
+    border: 0;
+    border-top: var(--border-width-hairline) solid var(--color-border);
+  }
+
+  /* GFM tables (remark-gfm). Scroll horizontally on overflow, never the page. */
+  .richtext table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    display: block;
+    overflow-x: auto;
+  }
+  .richtext th,
+  .richtext td {
+    border: var(--border-width-hairline) solid var(--color-border);
+    padding-inline: var(--spacing-xs);
+    padding-block: var(--spacing-2xs);
+    text-align: left;
+    vertical-align: top;
+  }
+  .richtext thead th {
+    background-color: var(--color-surface);
+    font-weight: var(--font-weight-semibold);
+    border-bottom-color: var(--color-border-strong);
+  }
+}

@@ -1,0 +1,12 @@
+name: Website Template
+tagline: A reusable static template
+nav:
+  - label: Home
+    href: /
+  - label: About
+    href: /about
+footer:
+  text: © Website Template. Neutral demo content — clear before launch.
+  links:
+    - label: Privacy
+      href: /privacy

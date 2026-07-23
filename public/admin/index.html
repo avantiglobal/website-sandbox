@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Content Manager</title>
+  </head>
+  <body>
+    <!--
+      Sveltia CMS, self-hosted (spec 0.2). The bundle is vendored into this
+      folder by scripts/build-cms-config.mts, so it loads from same-origin and
+      satisfies script-src 'self' — no CDN, no unsafe-inline, no unsafe-eval.
+
+      NOT present, by design (deprecated/unsupported in Sveltia):
+        - Netlify Identity widget <script>
+        - git-gateway
+      Auth is Netlify-as-OAuth-provider; config.yml holds the github backend.
+
+      Sveltia auto-mounts on load and fetches ./config.yml from this directory.
+      NOTE: dist/sveltia-cms.js is an IIFE bundle, NOT an ES module — it must be
+      loaded as a plain <script> (no type="module"), or Sveltia warns.
+    -->
+    <script src="./sveltia-cms.js"></script>
+  </body>
+</html>

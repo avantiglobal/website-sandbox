@@ -1,0 +1,39 @@
+{
+  "name": "website-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable static website template — Next.js 16 + Tailwind v4 + Sveltia CMS on Netlify",
+  "scripts": {
+    "dev": "next dev",
+    "cms:config": "node scripts/build-cms-config.mts",
+    "prebuild": "npm run cms:config",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3",
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  },
+  "comments": {
+    "overrides": "sharp is an unused OPTIONAL dep of Next. Route (a) sends all image optimisation to the Netlify Image CDN, so sharp never executes. It cannot be surgically omitted (--omit=optional also strips required lightningcss/swc native binaries), so we pin it to the patched latest to clear the libvips CVE advisories. Re-audit and drop this pin once Next's own sharp floor moves past it."
+  },
+  "overrides": {
+    "sharp": "0.35.3"
+  },
+  "devDependencies": {
+    "@sveltia/cms": "0.172.4",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "yaml": "2.9.0"
+  }
+}
