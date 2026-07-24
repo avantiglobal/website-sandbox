@@ -109,9 +109,8 @@ in `.claude/skills/` so the next build avoids them. Newest section at the bottom
 - **Implemented in 0.4** on the `rich_text_section` block: the markdown widget's
   `buttons` list enumerates `heading-two`/`heading-three`/`heading-four` and OMITS
   `heading-one` (see `components/blocks/rich-text-section/schema.ts`). h1 stays
-  styled-but-unreachable from the toolbar. **Still to verify on a live `/admin`:**
-  that Sveltia honours the Decap-style `buttons` list and actually hides the H1
-  control — the build only serialises the YAML, it can't prove the editor UI.
+  styled-but-unreachable from the toolbar. **Verified live** (2026-07-24): the H1
+  control is absent from the rich-text toolbar on the deployed `/admin`.
 - **The page's single h1 now comes from the `page_hero` block**, not the page shell.
   `app/page.tsx` no longer renders `page.title` as a visible h1 (title feeds
   `generateMetadata`/`<title>` only). Consequence: a page whose first block is NOT a
@@ -142,15 +141,18 @@ in `.claude/skills/` so the next build avoids them. Newest section at the bottom
   primitive's loader uses → `/.netlify/images?url=…&w=…&q=…`). Adds `loading="lazy"`
   and `decoding="async"`. Raw HTML stays disabled (no rehype-raw), so this override
   is the only image path out of RichText.
-- **Intrinsic width/height are NOT emitted yet — deferred, dimensions can follow.**
-  Reading them means parsing image headers at build time in the content layer, and
-  there is **no image-size lib installed** (and `sharp` isn't resolvable — it's an
-  unused optional dep, see the sharp note above). So the choices are: add a small
-  build-time dep (`image-size`) or hand-roll a PNG/JPEG/GIF/WebP header parser. Until
-  then, body images can cause layout shift. When adding: resolve dims for
-  root-relative srcs (`public/…`) only; skip/omit for remote srcs; do NOT hard-fail
-  the build on a missing inline image (inline media isn't a "required entry" under
-  the fail-loud rule).
+- **Intrinsic width/height ARE now emitted** (2026-07-24). `lib/content/image-dimensions.ts`
+  reads the real pixel size at build via `image-size@2.0.2` (zero-dependency,
+  build-time-only **devDependency** — never ships to the static output; Netlify
+  installs dev deps during build, same as tailwind/typescript). `RichText` is now an
+  async server component: it pre-scans the markdown for image srcs, resolves dims for
+  root-relative (`public/…`) srcs, and threads `width`/`height` onto the `<img>` so
+  the browser reserves the box (no CLS). EXIF orientations 5–8 swap w/h. Remote and
+  missing/undecodable inline images resolve to `null` → dims omitted, build does NOT
+  fail (inline media isn't a "required entry"). All verified by build.
+- **Do NOT `npm audit fix --force`** after adding image-size — the 2 advisories are
+  the pre-existing Next-internal `postcss` ones (image-size has zero deps and is not
+  implicated); the "fix" still proposes the catastrophic `next@9.3.3` downgrade.
 - **Remote markdown images** would additionally need `[images] remote_images` allow-
   listing in `netlify.toml`; local (`/media/…`) images work with no extra config.
 - **Test fixture:** `public/media/sample-landscape.png` (1600×900) is a real in-repo
