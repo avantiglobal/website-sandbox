@@ -147,6 +147,24 @@ in `.claude/skills/` so the next build avoids them. Newest section at the bottom
   image so the deployed CDN has something to actually transform. Clear/replace per
   project along with the rest of `content/` + demo assets.
 
+## Tier-3 patterns (0.5)
+
+- **A pattern is a structural VARIANT** — arrangement only, zero content knowledge
+  and zero visual identity (`components/patterns/`, built from tier-1 primitives).
+  `Split` (two-column, `reverse`, stacks on mobile) and `Center` (centred stack).
+- **Blocks select a pattern via a CMS `variant` field** (a `select` widget). The
+  block renderer delegates layout to the pattern component; the *content contract*
+  stays identical across variants. `page_hero` ships `stacked | centered | split`.
+- **Fail-loud extends to variants:** an unknown `variant` throws (naming the known
+  set), and a variant's own required fields throw too — e.g. `split` requires
+  `image`, so a split hero with no media fails the build rather than rendering
+  lopsided. Both verified by building with a bad `home.md`.
+- **The boundary that matters:** a NEW block type is 0.4; a structural VARIANT of an
+  existing block is 0.5. Adding `variant`/`image` to `page_hero` is the 0.5 kind.
+- **Split media uses the Image primitive in aspect mode** (`fill` inside a tokenised
+  aspect box), so it reserves space and is CLS-safe even though the CDN bytes 404
+  locally. On the home page the split hero image goes through the Netlify Image CDN.
+
 ## Netlify OAuth app click-path (verified against current docs)
 
 GitHub side:

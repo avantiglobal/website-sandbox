@@ -16,6 +16,7 @@ import {
   type ButtonVariant,
   type ControlSize,
 } from "@/components/primitives";
+import { Center, Split } from "@/components/patterns";
 
 export const metadata: Metadata = {
   title: "Primitive reference",
@@ -395,6 +396,84 @@ export default function ReferencePage() {
               </Button>
             </div>
           </form>
+        </Container>
+      </Section>
+
+      {/* ---- Patterns (tier 3) ---- */}
+      <Section>
+        <Container>
+          <SectionHeading>Patterns (tier 3)</SectionHeading>
+          <p className="mt-[var(--spacing-sm)] mb-[var(--spacing-lg)] max-w-[var(--container-prose)] text-[var(--color-fg-muted)]">
+            Structural variants with zero content knowledge. Blocks pick one via
+            a CMS <code className="font-mono">variant</code> field (e.g. the home
+            hero uses <code className="font-mono">Split</code>).
+          </p>
+          <div className="flex flex-col gap-[var(--spacing-2xl)]">
+            <Demo title="Split — media right (stacks on mobile)">
+              <Split
+                media={
+                  <Image
+                    src="/media/sample-landscape.png"
+                    alt=""
+                    aspect="photo"
+                    rounded="lg"
+                    wrapperClassName="bg-[var(--color-surface)]"
+                    sizes="(min-width: 48rem) 50vw, 100vw"
+                  />
+                }
+              >
+                <h3 className="text-2xl font-[var(--font-weight-semibold)] tracking-[var(--tracking-tight)]">
+                  Content beside media
+                </h3>
+                <p className="mt-[var(--spacing-sm)] text-[var(--color-fg-muted)]">
+                  Two columns on desktop, single column (content first) on
+                  mobile.
+                </p>
+                <p className="mt-[var(--spacing-md)]">
+                  <Button>Primary action</Button>
+                </p>
+              </Split>
+            </Demo>
+
+            <Demo title="Split — media left (reverse)">
+              <Split
+                reverse
+                media={
+                  <Image
+                    src="/media/sample-landscape.png"
+                    alt=""
+                    aspect="photo"
+                    rounded="lg"
+                    wrapperClassName="bg-[var(--color-surface)]"
+                    sizes="(min-width: 48rem) 50vw, 100vw"
+                  />
+                }
+              >
+                <h3 className="text-2xl font-[var(--font-weight-semibold)] tracking-[var(--tracking-tight)]">
+                  Same structure, reversed
+                </h3>
+                <p className="mt-[var(--spacing-sm)] text-[var(--color-fg-muted)]">
+                  <code className="font-mono">reverse</code> swaps the columns on
+                  desktop only — mobile order is unchanged.
+                </p>
+              </Split>
+            </Demo>
+
+            <Demo title="Center — centred stack">
+              <Center>
+                <h3 className="text-2xl font-[var(--font-weight-semibold)] tracking-[var(--tracking-tight)]">
+                  Centred content
+                </h3>
+                <p className="mt-[var(--spacing-sm)] max-w-[var(--container-prose)] text-[var(--color-fg-muted)]">
+                  A centred column with centred text; the measure comes from the
+                  content and the enclosing Container.
+                </p>
+                <p className="mt-[var(--spacing-md)]">
+                  <Button variant="secondary">Secondary action</Button>
+                </p>
+              </Center>
+            </Demo>
+          </div>
         </Container>
       </Section>
     </main>

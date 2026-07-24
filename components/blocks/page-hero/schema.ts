@@ -12,12 +12,31 @@ const schema: BlockSchema = {
   label: "Page hero",
   summary: "Hero — {{fields.heading}}",
   fields: [
+    {
+      name: "variant",
+      label: "Layout",
+      widget: "select",
+      required: false,
+      default: "stacked",
+      options: [
+        { label: "Stacked (left)", value: "stacked" },
+        { label: "Centered", value: "centered" },
+        { label: "Split with media", value: "split" },
+      ],
+    },
     { name: "heading", label: "Heading", widget: "string" },
     {
       name: "subheading",
       label: "Subheading",
       widget: "text",
       required: false,
+    },
+    {
+      name: "image",
+      label: "Media",
+      widget: "image",
+      required: false,
+      hint: "Required for the Split layout; ignored otherwise.",
     },
     {
       name: "cta",

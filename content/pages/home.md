@@ -4,8 +4,10 @@ description: Neutral demo home page composed from tier-2 CMS blocks.
 slug: home
 blocks:
   - type: page_hero
+    variant: split
     heading: Build once, reskin per client
     subheading: A neutral static template wired to a git-based CMS.
+    image: /media/sample-landscape.png
     cta:
       label: View the primitive reference
       href: /reference/
