@@ -64,6 +64,16 @@ in `.claude/skills/` so the next build avoids them. Newest section at the bottom
   `/admin` on the DEPLOYED Netlify URL. Local uses the File System Access API
   ("Work with Local Repository") and never exercises OAuth. The GitHub-login popup goes to
   `https://api.netlify.com/auth` and needs a real site + registered OAuth app.
+- **Sveltia needs Google Fonts, or /admin renders with NO ICONS.** At runtime Sveltia
+  injects `<link>`s to `fonts.googleapis.com` (its Material Symbols icon font + UI
+  fonts Merriweather Sans / Noto Sans Mono) and pulls the font files from
+  `fonts.gstatic.com`. The tight `/*` CSP (`style-src 'self' 'unsafe-inline'`,
+  `font-src 'self' data:`) blocks both → iconless, wrong-font UI. Fix (live-verified):
+  an `/admin/*`-scoped CSP that adds `https://fonts.googleapis.com` to `style-src` and
+  `https://fonts.gstatic.com` to `font-src`. Netlify applies the most-specific path's
+  value for a given header, so this REPLACES the `/*` CSP for `/admin/*` (one header,
+  no duplicate — confirmed by curl) and the public site stays tight. This is a
+  style/font-src widen, distinct from the connect-src note below.
 - **CSP directive most likely to need widening on the live test:** `connect-src`. Currently
   `'self' https://api.github.com https://api.netlify.com`. The OAuth popup is a top-level
   nav (not governed by connect-src), but post-login GitHub API calls need api.github.com
