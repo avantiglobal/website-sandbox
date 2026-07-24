@@ -21,9 +21,20 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com https://api.netlify.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
-# The /admin OAuth popup flow breaks under COOP 'same-origin'; scope the
-# popup-friendly value to the admin route only (spec 0.2 known gotcha).
+# Admin-only header overrides. Netlify applies the most specific matching path
+# for a given header, so this Content-Security-Policy REPLACES the /* one for
+# /admin/* (the public site keeps the tight policy above).
+#
+# Two reasons this route needs a wider CSP than the public site:
+#   1. COOP 'same-origin' breaks the OAuth login popup — relax to
+#      'same-origin-allow-popups' (spec 0.2 known gotcha).
+#   2. Sveltia injects <link> tags to Google Fonts at runtime for its Material
+#      Symbols ICON font and UI fonts. The tight policy blocks those, so /admin
+#      renders with no icons. Allow the stylesheet host in style-src
+#      (fonts.googleapis.com) and the font-file host in font-src
+#      (fonts.gstatic.com). The public site references neither, so it stays tight.
 [[headers]]
   for = "/admin/*"
   [headers.values]
     Cross-Origin-Opener-Policy = "same-origin-allow-popups"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.github.com https://api.netlify.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
