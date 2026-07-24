@@ -96,12 +96,33 @@ in `.claude/skills/` so the next build avoids them. Newest section at the bottom
   the RichText sample was demoted to start at h2 for this reason.
 - **`RichText` keeps h1 styled** so legacy content that already contains an h1 still
   renders correctly — we style it, we just don't want editors producing new ones.
-- **The real fix lands in 0.4:** the CMS rich-text field(s) must restrict the editor
-  to **h2–h4**. Sveltia/Decap markdown widgets take a `mineHeadingLevel`/toolbar
-  config (verify the exact key when building the block schema) — expose only h2, h3,
-  h4 buttons so a live page can't gain a second h1 through the editor. h1 stays
-  styled-but-unreachable; h5/h6 styling stays for completeness but is out of the
-  editor toolbar too (nesting that deep in body copy is a content smell).
+- **Implemented in 0.4** on the `rich_text_section` block: the markdown widget's
+  `buttons` list enumerates `heading-two`/`heading-three`/`heading-four` and OMITS
+  `heading-one` (see `components/blocks/rich-text-section/schema.ts`). h1 stays
+  styled-but-unreachable from the toolbar. **Still to verify on a live `/admin`:**
+  that Sveltia honours the Decap-style `buttons` list and actually hides the H1
+  control — the build only serialises the YAML, it can't prove the editor UI.
+- **The page's single h1 now comes from the `page_hero` block**, not the page shell.
+  `app/page.tsx` no longer renders `page.title` as a visible h1 (title feeds
+  `generateMetadata`/`<title>` only). Consequence: a page whose first block is NOT a
+  hero will have no h1 — model pages so a hero (or another h1-owning block) leads.
+
+## Tier-2 blocks (0.4)
+
+- **A block is a folder** `components/blocks/<name>/` with `schema.ts` (CMS fields)
+  + `index.tsx` (renderer). The assembler auto-discovers any `<name>/schema.ts` and
+  folds it into the page `blocks` list widget — no registration step in the config.
+- **`schema.ts` MUST stay React-free.** The Node config assembler imports it directly
+  under type-stripping; a value import of anything tsx/React would break `prebuild`.
+  Keep it a pure default-exported object; import the `BlockSchema` *type* via a
+  relative `../../../lib/cms/types.ts` path (type-only, erased at runtime — matches
+  the assembler's own convention). The blocks barrel deliberately does NOT re-export
+  the schemas, to keep that React-free boundary intact.
+- **The runtime discriminator lives in TWO places that must agree:** the block
+  folder's `schema.name`, and the key in `components/blocks/registry.tsx`. Both must
+  equal the `type` written into page frontmatter. `BlockRenderer` throws (fail-loud)
+  on an unknown `type`; each block throws on its own missing required fields — both
+  verified by building with a bad `home.md`.
 
 ## RichText images → Netlify Image CDN (0.3)
 

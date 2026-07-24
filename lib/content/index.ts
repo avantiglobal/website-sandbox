@@ -2,4 +2,4 @@
 export * from "./types";
 export * from "./pages";
 export * from "./site";
-export { ContentError } from "./validate";
+export { ContentError, requireString, requireArray } from "./validate";
