@@ -63,15 +63,18 @@ Set if the brief gives them; else keep defaults. Keep `--color-danger-fg` /
 
 ## Typography
 
-### Families → `--font-sans` / `--font-serif` / `--font-mono`
-Put the brand body family first in `--font-sans` (or `--font-serif` if the brand is
-serif-bodied), keeping a full fallback stack. Display family: if it differs from
-body, it's usually the other family slot (e.g. serif display + sans body → set
-`--font-serif` to the display face and use it on headings via the existing
-`.richtext`/heading styles — those already reference the families). **Self-host
-webfonts** (add `@font-face` in `app/globals.css` pointing at files under
-`public/`, `font-src 'self'`) — no external font host (CSP blocks it; that's why
-Sveltia's Google-Fonts needed a CSP widen).
+### Families → `--font-sans` (body) / `--font-display` (headings) / `--font-mono`
+- **Body** → `--font-sans`. Put the brand body family first, keep a full fallback
+  stack.
+- **Headings / display** → `--font-display`. All `h1–h6` (including RichText
+  headings) reference this via globals.css, so **serif display + sans body** works
+  purely through tokens: set `--font-display` to the display face, leave
+  `--font-sans` as the body face. `--font-display` defaults to `var(--font-sans)`,
+  so a brand with one family just leaves it alone. (`--font-serif` still exists as
+  a generic serif slot if you need a third family, e.g. for quotes.)
+- **Self-host webfonts** — add `@font-face` in `app/globals.css` pointing at files
+  under `public/`, `font-src 'self'`. **No external font host** (the CSP blocks it;
+  that's why Sveltia's Google Fonts needed a scoped CSP widen — see NOTES.md).
 
 ### Scale personality → `--text-xs … --text-5xl`
 - **balanced:** keep defaults.
@@ -133,5 +136,12 @@ default rules, components reference the token — adjust the token, not componen
 
 1. `npm run build` passes.
 2. `/reference` + home render in the new brand.
-3. AA contrast holds on: body text, muted text, on-primary, on-accent, error text,
-   links. Focus ring visible (tab through). Fix via `brand-kit.md` → recompile.
+3. **Text contrast (WCAG 1.4.3, 4.5:1):** body text, muted text (`fg-muted` on
+   `bg`/`surface`/`surface-raised`), on-primary, on-accent, error text, links.
+   `fg-subtle` is placeholder-only (exempt), not body text.
+4. **Non-text / UI contrast (WCAG 1.4.11, 3:1):** `--color-border-strong` on `bg`
+   must clear 3:1 — it's the visible boundary of inputs and secondary buttons. If
+   the neutral tint lightened it below 3:1, darken the ramp step it aliases (it
+   points at `--color-neutral-400`) until it passes. Also check the focus ring is
+   visible against every surface.
+5. Fix any failure via `brand-kit.md` → recompile — never by patching components.

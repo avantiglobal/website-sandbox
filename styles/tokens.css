@@ -45,7 +45,9 @@
   --color-fg-muted: var(--color-neutral-500);
   --color-fg-subtle: var(--color-neutral-400);
   --color-border: var(--color-neutral-200);
-  --color-border-strong: var(--color-neutral-300);
+  /* neutral-400 (not -300): UI-boundary contrast on bg must clear WCAG 1.4.11
+     (3:1) for input/secondary-button borders. -300 was ~1.9:1 and failed. */
+  --color-border-strong: var(--color-neutral-400);
   --color-primary: var(--color-brand-600);
   --color-primary-hover: var(--color-brand-700);
   --color-primary-fg: var(--color-neutral-0);
@@ -72,6 +74,10 @@
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+  /* Heading/display family. All headings (h1–h6, incl. RichText) reference this
+     via globals.css, so a brand can set a serif/display face for headings while
+     body stays --font-sans. Defaults to --font-sans → neutral look unchanged. */
+  --font-display: var(--font-sans);
 
   /* ---- Typography: modular type scale ----------------------------------- */
   --text-xs: 0.75rem;

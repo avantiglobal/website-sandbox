@@ -18,6 +18,19 @@
     line-height: var(--text-base--line-height);
   }
 
+  /* All headings use the display family (defaults to --font-sans). Lets a brand
+     set a serif/display face for headings while body copy stays sans — a very
+     common brand pattern the token layer couldn't express otherwise. Covers
+     RichText headings too (they only override size/weight, not family). */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+
   /* Visible focus indicator everywhere — accessibility floor (spec 0.3). */
   :focus-visible {
     outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
