@@ -12,13 +12,13 @@ blocks:
       label: View the primitive reference
       href: /reference/
   - type: rich_text_section
-    body: |
+    body: |-
       ## Composed from tier-2 blocks
 
       This page is assembled from CMS blocks — a **page hero** and this
       **rich-text section** — each a component + schema pair parsed at build.
 
-      - Tokens drive every style
+      - Tokens drive every style.
       - Content lives in markdown / YAML
       - The build fails loud on a missing required field
 ---
