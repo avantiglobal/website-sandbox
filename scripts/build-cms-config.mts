@@ -20,6 +20,7 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { stringify as toYaml } from "yaml";
 import type { BlockSchema } from "../lib/cms/types.ts";
 import { baseConfig, siteFileCollection } from "../lib/cms/base-config.ts";
+import { COLLECTIONS } from "../lib/cms/collections.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const BLOCKS_DIR = join(ROOT, "components", "blocks");
@@ -69,6 +70,17 @@ function blockToListType(block: BlockSchema) {
   };
 }
 
+/** The block list widget, shared by pages and every collection item. */
+function blocksField(blocks: BlockSchema[]) {
+  return {
+    name: "blocks",
+    label: "Content blocks",
+    widget: "list",
+    // typeKey defaults to "type" — matches BlockInstance.type in frontmatter.
+    types: blocks.map(blockToListType),
+  };
+}
+
 function buildPagesCollection(blocks: BlockSchema[]) {
   return {
     name: "pages",
@@ -93,15 +105,70 @@ function buildPagesCollection(blocks: BlockSchema[]) {
         required: false,
         hint: 'Leave blank to derive from filename. "home" maps to /.',
       },
-      {
-        name: "blocks",
-        label: "Content blocks",
-        widget: "list",
-        // typeKey defaults to "type" — matches BlockInstance.type in frontmatter.
-        types: blocks.map(blockToListType),
-      },
+      blocksField(blocks),
     ],
   };
+}
+
+/**
+ * One folder collection per registry entry (spec 0.6). `create: true` is the
+ * whole point: the editor adds a service or an area on their own and the item
+ * gets its page, with no developer in the loop.
+ *
+ * The slug is the filename — the route is /<basePath>/<filename>, so there is
+ * no editable slug field here to disagree with it.
+ */
+function buildFolderCollections(blocks: BlockSchema[]) {
+  return COLLECTIONS.map((c) => ({
+    name: c.name,
+    label: c.label,
+    label_singular: c.singularLabel,
+    folder: `content/${c.name}`,
+    create: true,
+    extension: "md",
+    format: "frontmatter",
+    slug: "{{slug}}",
+    fields: [
+      { name: "title", label: "Title", widget: "string" },
+      {
+        name: "description",
+        label: "Description",
+        widget: "string",
+        required: false,
+        hint: "Used as the page meta description, and as the card text when no excerpt is set.",
+      },
+      {
+        name: "excerpt",
+        label: "Card excerpt",
+        widget: "text",
+        required: false,
+        hint: "Short summary shown on listing cards.",
+      },
+      {
+        name: "image",
+        label: "Card image",
+        widget: "image",
+        required: false,
+      },
+      {
+        name: "featured",
+        label: "Featured",
+        widget: "boolean",
+        required: false,
+        default: false,
+        hint: "Lets a page list a curated subset instead of the whole collection.",
+      },
+      {
+        name: "order",
+        label: "Sort order",
+        widget: "number",
+        required: false,
+        value_type: "int",
+        hint: "Lower numbers first. Leave blank to sort alphabetically after the ordered items.",
+      },
+      blocksField(blocks),
+    ],
+  }));
 }
 
 async function main() {
@@ -109,7 +176,11 @@ async function main() {
 
   const config = {
     ...baseConfig,
-    collections: [buildPagesCollection(blocks), siteFileCollection],
+    collections: [
+      buildPagesCollection(blocks),
+      ...buildFolderCollections(blocks),
+      siteFileCollection,
+    ],
   };
 
   await mkdir(ADMIN_DIR, { recursive: true });
@@ -124,6 +195,10 @@ async function main() {
   console.log(
     `[cms:config] wrote config.yml with ${blocks.length} block type(s): ` +
       `${blocks.map((b) => b.name).join(", ") || "(none yet)"}`,
+  );
+  console.log(
+    `[cms:config] ${COLLECTIONS.length} folder collection(s): ` +
+      `${COLLECTIONS.map((c) => c.name).join(", ") || "(none yet)"}`,
   );
   console.log("[cms:config] vendored sveltia-cms.js into public/admin");
 }

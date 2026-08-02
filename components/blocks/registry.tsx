@@ -6,9 +6,10 @@
  * throws at build with the page source, rather than silently dropping content.
  * Each block validates its own required fields.
  */
-import type { ComponentType } from "react";
+import type { ReactNode } from "react";
 import type { BlockInstance } from "@/lib/content";
 import { ContentError } from "@/lib/content";
+import { CollectionList } from "./collection-list";
 import { PageHero } from "./page-hero";
 import { RichTextSection } from "./rich-text-section";
 
@@ -18,7 +19,15 @@ export interface BlockProps {
   source: string;
 }
 
-const registry: Record<string, ComponentType<BlockProps>> = {
+/**
+ * A block renderer may be async: some blocks read content at build (spec 0.6 —
+ * collection_list enumerates a folder collection). React server components can
+ * return a promise, which the sync `ComponentType` would exclude.
+ */
+type BlockComponent = (props: BlockProps) => ReactNode | Promise<ReactNode>;
+
+const registry: Record<string, BlockComponent> = {
+  collection_list: CollectionList,
   page_hero: PageHero,
   rich_text_section: RichTextSection,
 };

@@ -38,6 +38,42 @@ export const baseConfig: Omit<BaseConfig, "collections"> = {
 };
 
 /**
+ * Navigation fields (spec 0.7) — shared by the header and footer menus.
+ *
+ * Nested exactly one level: a top-level entry may carry a `children` list, and
+ * a child may not. Deeper menus are hostile on touch and the renderer would
+ * have nowhere to put them. Keeping the ceiling in the schema means the CMS
+ * simply never offers a third level.
+ *
+ * `href` is optional at the top level so an entry can act purely as a dropdown
+ * label; the reader throws if an entry has neither a link nor children.
+ */
+const navChildFields = [
+  { name: "label", label: "Label", widget: "string" },
+  { name: "href", label: "Link", widget: "string" },
+];
+
+const navItemFields = [
+  { name: "label", label: "Label", widget: "string" },
+  {
+    name: "href",
+    label: "Link",
+    widget: "string",
+    required: false,
+    hint: "Leave blank to make this a submenu label only.",
+  },
+  {
+    name: "children",
+    label: "Submenu",
+    widget: "list",
+    required: false,
+    collapsed: true,
+    fields: navChildFields,
+    hint: "One level only — submenu entries cannot have their own submenu.",
+  },
+];
+
+/**
  * Non-block collections (global site settings as a "file" collection).
  * Block-driven page bodies are added by the assembler.
  */
@@ -54,12 +90,11 @@ export const siteFileCollection = {
         { name: "tagline", label: "Tagline", widget: "string", required: false },
         {
           name: "nav",
-          label: "Navigation",
+          label: "Header navigation",
           widget: "list",
-          fields: [
-            { name: "label", widget: "string" },
-            { name: "href", widget: "string" },
-          ],
+          label_singular: "Menu item",
+          summary: "{{fields.label}}",
+          fields: navItemFields,
         },
         {
           name: "footer",
@@ -67,15 +102,16 @@ export const siteFileCollection = {
           widget: "object",
           required: false,
           fields: [
-            { name: "text", widget: "string", required: false },
+            { name: "text", label: "Footer text", widget: "string", required: false },
             {
               name: "links",
+              label: "Footer navigation",
               widget: "list",
               required: false,
-              fields: [
-                { name: "label", widget: "string" },
-                { name: "href", widget: "string" },
-              ],
+              label_singular: "Footer item",
+              summary: "{{fields.label}}",
+              fields: navItemFields,
+              hint: "An entry with a submenu renders as a labelled column.",
             },
           ],
         },

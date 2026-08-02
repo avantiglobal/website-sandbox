@@ -191,3 +191,85 @@ Netlify side:
 
 (Netlify has renamed this pane across versions — "Project configuration → Access & security
 → OAuth" is current as of this build. Re-verify per site.)
+
+## Folder collections — listing/detail (0.6)
+
+The listing/detail pair (services, areas, projects, team, blog) is one generic
+mechanism, not a per-type build. Four parts:
+
+- **`lib/cms/collections.ts` — the registry, pure data.** Same rule as block
+  schemas: no React/tsx imports, so the Node config assembler can import it.
+  It is the single source of truth for three things that must never disagree —
+  the CMS folder collection, the static routes, and the options `collection_list`
+  offers. Adding a collection = one entry + a `content/<name>/` folder.
+- **`lib/content/collections.ts` — one generic reader for every collection.**
+  Deliberately not one reader per type (unlike `pages.ts`): adding a collection
+  must not mean writing another reader.
+- **`app/[...slug]/page.tsx` — the catch-all.** Two segments whose first matches
+  a registered `basePath` resolve as a collection item; anything else is a page.
+  So a listing page (`/services`) and its items (`/services/x`) never collide.
+  Home stays at `app/page.tsx` on slug `""` and is filtered out of
+  `generateStaticParams` — a catch-all needs at least one segment.
+- **`collection_list` block — the listing.** This was the missing piece: the
+  readers and routes existed in earlier projects, nothing rendered an index.
+
+### Gotchas found building it
+
+- **A block renderer may be async.** `collection_list` reads content at build, so
+  the registry type had to widen from `ComponentType<BlockProps>` to
+  `(props) => ReactNode | Promise<ReactNode>`. React server components can return
+  a promise; `ComponentType` alone excludes them.
+- **`allowImportingTsExtensions: true` is now required in tsconfig.** Schema
+  fragments import `.ts` WITH the extension because Node's type-stripping needs
+  it. TS tolerates that for `import type` (which is why page-hero was fine) but
+  rejects it for a value import — and `collection_list/schema.ts` imports the
+  actual `COLLECTIONS` array. The flag is legal here because `noEmit` is set.
+  If Next ever rewrites tsconfig and drops it, typecheck fails with TS5097.
+- **An empty collection is NOT a build failure.** Fail-loud covers an
+  unregistered collection name or a malformed `limit`, but an editor who has not
+  added items yet must get a quiet valid page, not a broken build.
+- **Item slug is the filename, full stop.** Folder collections get no editable
+  slug field (pages do), so there is nothing to disagree with the route.
+
+## Navigation (0.7)
+
+Header and footer read `site.yml` through the settings reader — before this the
+nav data existed, was validated, and **nothing rendered it**: `layout.tsx` had no
+chrome at all.
+
+- **One level of nesting, enforced in the schema.** A top-level entry may carry
+  `children`; a child may not. The CMS therefore never offers a third level.
+  Deeper menus are hostile on touch and the renderer has nowhere to put them.
+- **`href` is optional at the top level** so an entry can be a pure dropdown
+  label. The reader throws when an entry has neither `href` nor `children` —
+  that would render as dead, unclickable text.
+- **A grouping label renders as `<span>`, not an empty `<a>`.** A focusable
+  anchor that goes nowhere is a keyboard trap for no reason.
+- **No client JavaScript.** Desktop submenus open on hover AND `focus-within`
+  (keyboard-reachable); the mobile menu is a native `<details>` disclosure, which
+  brings its own expanded/collapsed semantics. A menu that needs hydration to
+  open is a menu that fails before hydration.
+- **Footer links reuse the NavItem shape:** an entry with `children` renders as a
+  labelled column, without one it is an inline link. One shape, two layouts,
+  nothing extra to learn in the CMS.
+
+## Reusing a collection across pages (0.7)
+
+`collection_list` stores a **reference** (`collection: services`), never the
+items. The same block on Home and on /services renders from the same
+`content/services/*.md` — edit a service once, both pages change. This is the
+whole point of folder collections; embedding an `items` array inside a block
+(as earlier projects did for area cards) means entering the data twice and
+watching the copies drift.
+
+- **Curated subsets use a `featured` flag on the item**, plus `featuredOnly` on
+  the block. Home lists the featured few, /services lists everything, one source.
+- **Why not the `relation` widget:** Sveltia supports it (verified in 0.172.4),
+  but a relation field targets a **fixed** collection declared in the schema,
+  and `collection_list` picks its collection from an editor-set select. Making
+  hand-picking work would mean generating one list block per collection
+  (`services_list`, `areas_list`, …) so each can carry its own relation field.
+  That is the upgrade path if arbitrary hand-ordering is ever needed; the
+  featured flag covers the common case without multiplying block types.
+- **Filter before limiting.** "3 featured" must mean three featured items, not
+  the first three items of which some are featured.

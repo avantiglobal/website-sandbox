@@ -11,6 +11,12 @@ blocks:
     cta:
       label: View the primitive reference
       href: /reference/
+  - type: collection_list
+    collection: services
+    heading: Featured services
+    intro: Same collection the Services page lists — referenced, not re-entered.
+    featuredOnly: true
+    columns: "2"
   - type: rich_text_section
     body: |-
       ## Composed from tier-2 blocks

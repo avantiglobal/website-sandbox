@@ -7,5 +7,6 @@
  */
 export { BlockRenderer } from "./registry";
 export type { BlockProps } from "./registry";
+export { CollectionList } from "./collection-list";
 export { PageHero } from "./page-hero";
 export { RichTextSection } from "./rich-text-section";
